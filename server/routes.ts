@@ -58,14 +58,30 @@ export function registerRoutes(app: Express) {
   app.post("/api/projects/:id/analyze-idea", async (req, res) => {
     try {
       const { problemStatement, targetMarket, uniqueValue } = req.body;
+      if (!problemStatement || !targetMarket || !uniqueValue) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
       const analysis = await analyzeStartupIdea(
         problemStatement,
         targetMarket,
         uniqueValue
       );
-      res.json(analysis);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+
+      // Ensure the analysis has the expected structure
+      if (!analysis || typeof analysis !== 'object') {
+        throw new Error("Invalid analysis response format");
+      }
+
+      res.json({
+        marketPotential: analysis.marketPotential || "No market potential analysis available",
+        risks: Array.isArray(analysis.risks) ? analysis.risks : [],
+        suggestions: Array.isArray(analysis.suggestions) ? analysis.suggestions : [],
+        competitiveAdvantage: analysis.competitiveAdvantage || "No competitive advantage analysis available"
+      });
+    } catch (error: any) {
+      console.error("Analysis error:", error);
+      res.status(500).json({ error: error.message || "Failed to analyze idea" });
     }
   });
 
