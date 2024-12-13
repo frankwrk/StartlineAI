@@ -135,11 +135,15 @@ export default function IdeaValidation() {
       [field]: value
     }));
     
-    // Save changes as user types
-    mutation.mutate({
-      ...formData,
-      [field]: value
-    });
+    // Debounce save operation by 1 second
+    const timeoutId = setTimeout(() => {
+      mutation.mutate({
+        ...formData,
+        [field]: value
+      });
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
   };
 
   const getCurrentValue = () => {
