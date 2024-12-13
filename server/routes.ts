@@ -54,6 +54,20 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  app.post("/api/projects/:id/analyze-idea", async (req, res) => {
+    try {
+      const { problemStatement, targetMarket, uniqueValue } = req.body;
+      const analysis = await analyzeStartupIdea(
+        problemStatement,
+        targetMarket,
+        uniqueValue
+      );
+      res.json(analysis);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post("/api/projects/:id/business-plan", async (req, res) => {
     try {
       const plan = await db

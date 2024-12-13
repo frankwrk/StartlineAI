@@ -12,7 +12,13 @@ interface IdeaValidation {
   targetMarket: string;
   uniqueValue: string;
   validationStatus: string;
-  aiSuggestions: any;
+  feedback?: string;
+  aiSuggestions: {
+    marketPotential: string;
+    risks: string[];
+    suggestions: string[];
+    competitiveAdvantage: string;
+  };
 }
 
 export default function IdeaValidation() {
@@ -54,21 +60,43 @@ export default function IdeaValidation() {
     }
   });
 
+  const analysisMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/projects/1/analyze-idea", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || "Failed to analyze idea");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      mutation.mutate({
+        ...formData,
+        validationStatus: "validated",
+        aiSuggestions: data
+      });
+      toast({
+        title: "Analysis Complete",
+        description: "AI has analyzed your startup idea.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        description: error.message
+      });
+    }
+  });
+
   const handleCommand = (command: string) => {
     const commands: Record<string, () => void> = {
       "next": () => setCurrentStep(prev => Math.min(prev + 1, 4)),
       "back": () => setCurrentStep(prev => Math.max(prev - 1, 1)),
-      "validate": () => {
-        mutation.mutate({
-          ...formData,
-          validationStatus: "validated",
-          aiSuggestions: {
-            improvement: "Consider narrowing target market focus",
-            potential: "High potential in B2B segment",
-            risks: "Competition from established players"
-          }
-        });
-      }
+      "validate": () => analysisMutation.mutate()
     };
 
     const cmd = commands[command];
@@ -143,18 +171,64 @@ export default function IdeaValidation() {
         </h2>
         <p className="text-green-300 mb-4">{steps[currentStep - 1].description}</p>
         
-        <Textarea
-          value={getCurrentValue()}
-          onChange={(e) => {
-            if (currentStep === 4) return;
-            const field = currentStep === 1 ? 'problemStatement' :
-                         currentStep === 2 ? 'targetMarket' : 'uniqueValue';
-            handleInputChange(field as keyof IdeaValidation, e.target.value);
-          }}
-          className="bg-black border-green-800 text-green-400 min-h-[200px]"
-          placeholder="Enter your response..."
-          readOnly={currentStep === 4}
-        />
+        {currentStep === 4 ? (
+          <div className="space-y-6">
+            <div className="bg-black/50 p-4 rounded border border-green-800">
+              <h3 className="text-green-400 font-bold mb-4">AI Analysis Results</h3>
+              {validation?.aiSuggestions ? (
+                <div className="space-y-4">
+                  <section>
+                    <h4 className="text-green-400 mb-2">Market Potential</h4>
+                    <p className="text-green-300">{validation.aiSuggestions.marketPotential}</p>
+                  </section>
+                  <section>
+                    <h4 className="text-green-400 mb-2">Risks</h4>
+                    <ul className="list-disc list-inside text-green-300">
+                      {validation.aiSuggestions.risks.map((risk, index) => (
+                        <li key={index}>{risk}</li>
+                      ))}
+                    </ul>
+                  </section>
+                  <section>
+                    <h4 className="text-green-400 mb-2">Suggestions</h4>
+                    <ul className="list-disc list-inside text-green-300">
+                      {validation.aiSuggestions.suggestions.map((suggestion, index) => (
+                        <li key={index}>{suggestion}</li>
+                      ))}
+                    </ul>
+                  </section>
+                  <section>
+                    <h4 className="text-green-400 mb-2">Competitive Advantage</h4>
+                    <p className="text-green-300">{validation.aiSuggestions.competitiveAdvantage}</p>
+                  </section>
+                </div>
+              ) : (
+                <p className="text-green-300">Click "Validate" to generate AI analysis</p>
+              )}
+            </div>
+            
+            <div>
+              <h3 className="text-green-400 font-bold mb-2">Your Feedback on Analysis</h3>
+              <Textarea
+                value={formData.feedback || ""}
+                onChange={(e) => handleInputChange("feedback", e.target.value)}
+                className="bg-black border-green-800 text-green-400 min-h-[100px]"
+                placeholder="What do you think about the AI's analysis? Any points you agree or disagree with?"
+              />
+            </div>
+          </div>
+        ) : (
+          <Textarea
+            value={getCurrentValue()}
+            onChange={(e) => {
+              const field = currentStep === 1 ? 'problemStatement' :
+                           currentStep === 2 ? 'targetMarket' : 'uniqueValue';
+              handleInputChange(field as keyof IdeaValidation, e.target.value);
+            }}
+            className="bg-black border-green-800 text-green-400 min-h-[200px]"
+            placeholder="Enter your response..."
+          />
+        )}
 
         <div className="flex justify-between mt-4">
           <Button
