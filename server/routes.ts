@@ -2,6 +2,7 @@ import { Express } from "express";
 import { db } from "../db";
 import { projects, ideaValidations, businessPlans, resourcePlans, mvpRequirements } from "@db/schema";
 import { eq } from "drizzle-orm";
+import { analyzeStartupIdea } from "./openai";
 
 export function registerRoutes(app: Express) {
   // Project routes
