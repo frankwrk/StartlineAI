@@ -18,6 +18,11 @@ interface IdeaValidation {
 export default function IdeaValidation() {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<Partial<IdeaValidation>>({
+    problemStatement: '',
+    targetMarket: '',
+    uniqueValue: ''
+  });
 
   const { data: validation, isLoading } = useQuery<IdeaValidation>({
     queryKey: ["/api/projects/1/idea-validation"],
@@ -36,6 +41,11 @@ export default function IdeaValidation() {
       }
       return response.json();
     },
+    onSuccess: () => {
+      toast({
+        description: "Progress saved successfully",
+      });
+    },
     onError: (error) => {
       toast({
         variant: "destructive",
@@ -50,16 +60,13 @@ export default function IdeaValidation() {
       "back": () => setCurrentStep(prev => Math.max(prev - 1, 1)),
       "validate": () => {
         mutation.mutate({
+          ...formData,
           validationStatus: "validated",
           aiSuggestions: {
             improvement: "Consider narrowing target market focus",
             potential: "High potential in B2B segment",
             risks: "Competition from established players"
           }
-        });
-        toast({
-          title: "Validation Complete",
-          description: "AI analysis has been generated for your idea.",
         });
       }
     };
@@ -75,26 +82,46 @@ export default function IdeaValidation() {
     }
   };
 
+  const handleInputChange = (field: keyof IdeaValidation, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Save changes as user types
+    mutation.mutate({
+      ...formData,
+      [field]: value
+    });
+  };
+
+  const getCurrentValue = () => {
+    if (currentStep === 4) {
+      return validation?.aiSuggestions ? JSON.stringify(validation.aiSuggestions, null, 2) : '';
+    }
+    
+    const field = currentStep === 1 ? 'problemStatement' :
+                 currentStep === 2 ? 'targetMarket' : 'uniqueValue';
+                 
+    return formData[field as keyof IdeaValidation] || '';
+  };
+
   const steps = [
     {
       title: "Problem Statement",
       description: "What problem does your idea solve?",
-      content: validation?.problemStatement || "",
     },
     {
       title: "Target Market",
       description: "Who are your potential customers?",
-      content: validation?.targetMarket || "",
     },
     {
       title: "Unique Value",
       description: "What makes your solution unique?",
-      content: validation?.uniqueValue || "",
     },
     {
       title: "AI Analysis",
       description: "Review AI-generated validation insights",
-      content: validation?.aiSuggestions ? JSON.stringify(validation.aiSuggestions, null, 2) : "",
     },
   ];
 
@@ -117,18 +144,12 @@ export default function IdeaValidation() {
         <p className="text-green-300 mb-4">{steps[currentStep - 1].description}</p>
         
         <Textarea
-          value={currentStep === 1 ? validation?.problemStatement || '' :
-                 currentStep === 2 ? validation?.targetMarket || '' :
-                 currentStep === 3 ? validation?.uniqueValue || '' :
-                 steps[currentStep - 1].content}
+          value={getCurrentValue()}
           onChange={(e) => {
             if (currentStep === 4) return;
             const field = currentStep === 1 ? 'problemStatement' :
                          currentStep === 2 ? 'targetMarket' : 'uniqueValue';
-            mutation.mutate({
-              ...validation,
-              [field]: e.target.value
-            });
+            handleInputChange(field as keyof IdeaValidation, e.target.value);
           }}
           className="bg-black border-green-800 text-green-400 min-h-[200px]"
           placeholder="Enter your response..."
