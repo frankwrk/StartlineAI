@@ -67,6 +67,7 @@ export function registerRoutes(app: Express) {
         targetMarket,
         uniqueValue
       );
+      console.log("OpenAI Analysis Response:", analysis);
 
       // Ensure the analysis has the expected structure
       if (!analysis || typeof analysis !== 'object') {

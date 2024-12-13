@@ -198,16 +198,16 @@ export default function IdeaValidation() {
           <div className="space-y-6">
             <div className="bg-black/50 p-4 rounded border border-green-800">
               <h3 className="text-green-400 font-bold mb-4">AI Analysis Results</h3>
-              {formData.aiSuggestions ? (
+              {analysisMutation.data ? (
                 <div className="space-y-4">
                   <section>
                     <h4 className="text-green-400 mb-2">Market Potential</h4>
-                    <p className="text-green-300">{validation.aiSuggestions.marketPotential}</p>
+                    <p className="text-green-300">{analysisMutation.data.marketPotential}</p>
                   </section>
                   <section>
                     <h4 className="text-green-400 mb-2">Risks</h4>
                     <ul className="list-disc list-inside text-green-300">
-                      {validation.aiSuggestions.risks.map((risk, index) => (
+                      {analysisMutation.data.risks.map((risk, index) => (
                         <li key={index}>{risk}</li>
                       ))}
                     </ul>
@@ -215,14 +215,14 @@ export default function IdeaValidation() {
                   <section>
                     <h4 className="text-green-400 mb-2">Suggestions</h4>
                     <ul className="list-disc list-inside text-green-300">
-                      {validation.aiSuggestions.suggestions.map((suggestion, index) => (
+                      {analysisMutation.data.suggestions.map((suggestion, index) => (
                         <li key={index}>{suggestion}</li>
                       ))}
                     </ul>
                   </section>
                   <section>
                     <h4 className="text-green-400 mb-2">Competitive Advantage</h4>
-                    <p className="text-green-300">{validation.aiSuggestions.competitiveAdvantage}</p>
+                    <p className="text-green-300">{analysisMutation.data.competitiveAdvantage}</p>
                   </section>
                 </div>
               ) : (
