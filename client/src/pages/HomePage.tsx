@@ -13,13 +13,15 @@ export default function HomePage() {
       help: () => {
         toast({
           title: "Available Commands",
-          description: `
-            validate - Start idea validation
-            plan - Create business plan
-            resources - Plan resources
-            mvp - MVP development guide
-          `,
-          className: "font-mono bg-gray-900 border-green-800",
+          description: [
+            "validate   - Start idea validation",
+            "plan      - Create business plan",
+            "resources - Plan resources",
+            "mvp       - MVP development guide",
+            "",
+            "Type any command to begin..."
+          ].join('\n'),
+          className: "font-mono bg-gray-900 border-green-800 whitespace-pre",
         });
       },
       validate: () => setLocation("/idea-validation"),
