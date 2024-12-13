@@ -95,6 +95,12 @@ export default function BusinessPlan() {
           <TabsContent value="summary">
             <Textarea
               value={plan?.executiveSummary || ""}
+              onChange={(e) => {
+                mutation.mutate({
+                  ...plan,
+                  executiveSummary: e.target.value
+                });
+              }}
               className="bg-black border-green-800 text-green-400 min-h-[300px]"
               placeholder="Enter executive summary..."
             />
@@ -103,6 +109,12 @@ export default function BusinessPlan() {
           <TabsContent value="market">
             <Textarea
               value={plan?.marketAnalysis || ""}
+              onChange={(e) => {
+                mutation.mutate({
+                  ...plan,
+                  marketAnalysis: e.target.value
+                });
+              }}
               className="bg-black border-green-800 text-green-400 min-h-[300px]"
               placeholder="Enter market analysis..."
             />
@@ -119,6 +131,12 @@ export default function BusinessPlan() {
           <TabsContent value="strategy">
             <Textarea
               value={plan?.strategy || ""}
+              onChange={(e) => {
+                mutation.mutate({
+                  ...plan,
+                  strategy: e.target.value
+                });
+              }}
               className="bg-black border-green-800 text-green-400 min-h-[300px]"
               placeholder="Enter business strategy..."
             />

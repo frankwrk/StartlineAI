@@ -109,6 +109,14 @@ export default function IdeaValidation() {
         
         <Textarea
           value={steps[currentStep - 1].content}
+          onChange={(e) => {
+            if (currentStep === 4) return;
+            mutation.mutate({
+              ...validation,
+              [currentStep === 1 ? 'problemStatement' : 
+                currentStep === 2 ? 'targetMarket' : 'uniqueValue']: e.target.value
+            });
+          }}
           className="bg-black border-green-800 text-green-400 min-h-[200px]"
           placeholder="Enter your response..."
           readOnly={currentStep === 4}
