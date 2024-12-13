@@ -30,9 +30,18 @@ export default function IdeaValidation() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to save validation");
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || "Failed to save validation");
+      }
       return response.json();
     },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        description: error.message
+      });
+    }
   });
 
   const handleCommand = (command: string) => {
@@ -108,13 +117,17 @@ export default function IdeaValidation() {
         <p className="text-green-300 mb-4">{steps[currentStep - 1].description}</p>
         
         <Textarea
-          value={steps[currentStep - 1].content}
+          value={currentStep === 1 ? validation?.problemStatement || '' :
+                 currentStep === 2 ? validation?.targetMarket || '' :
+                 currentStep === 3 ? validation?.uniqueValue || '' :
+                 steps[currentStep - 1].content}
           onChange={(e) => {
             if (currentStep === 4) return;
+            const field = currentStep === 1 ? 'problemStatement' :
+                         currentStep === 2 ? 'targetMarket' : 'uniqueValue';
             mutation.mutate({
               ...validation,
-              [currentStep === 1 ? 'problemStatement' : 
-                currentStep === 2 ? 'targetMarket' : 'uniqueValue']: e.target.value
+              [field]: e.target.value
             });
           }}
           className="bg-black border-green-800 text-green-400 min-h-[200px]"
