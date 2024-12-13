@@ -1,7 +1,10 @@
+
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY,
+  organization: process.env.OPENAI_ORG_ID 
+});
 
 export async function analyzeStartupIdea(
   problemStatement: string,
@@ -49,7 +52,6 @@ Provide a thorough analysis focusing on market potential, key risks, actionable 
 
     const parsedContent = JSON.parse(content);
     
-    // Ensure we have all required fields with proper fallbacks
     return {
       marketPotential: parsedContent.marketPotential || "No market potential analysis available",
       risks: Array.isArray(parsedContent.risks) ? parsedContent.risks : [],
