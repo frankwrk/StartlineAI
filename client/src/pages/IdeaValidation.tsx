@@ -65,29 +65,48 @@ export default function IdeaValidation() {
       const response = await fetch("/api/projects/1/analyze-idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          problemStatement: formData.problemStatement,
+          targetMarket: formData.targetMarket,
+          uniqueValue: formData.uniqueValue
+        }),
       });
+      
       if (!response.ok) {
         const error = await response.text();
         throw new Error(error || "Failed to analyze idea");
       }
-      return response.json();
+      
+      const data = await response.json();
+      if (!data || typeof data !== 'object') {
+        throw new Error("Invalid analysis response format");
+      }
+      
+      return data;
     },
     onSuccess: (data) => {
+      // Update the validation with AI suggestions
       mutation.mutate({
         ...formData,
         validationStatus: "validated",
-        aiSuggestions: data
+        aiSuggestions: {
+          marketPotential: data.marketPotential,
+          risks: data.risks,
+          suggestions: data.suggestions,
+          competitiveAdvantage: data.competitiveAdvantage
+        }
       });
+      
       toast({
         title: "Analysis Complete",
-        description: "AI has analyzed your startup idea.",
+        description: "AI has analyzed your startup idea. Review the analysis below.",
       });
     },
     onError: (error) => {
+      console.error("Analysis error:", error);
       toast({
         variant: "destructive",
-        description: error.message
+        description: `Analysis failed: ${error.message}`
       });
     }
   });
