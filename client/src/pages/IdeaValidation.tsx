@@ -198,7 +198,7 @@ export default function IdeaValidation() {
           <div className="space-y-6">
             <div className="bg-black/50 p-4 rounded border border-green-800">
               <h3 className="text-green-400 font-bold mb-4">AI Analysis Results</h3>
-              {validation?.aiSuggestions ? (
+              {formData.aiSuggestions ? (
                 <div className="space-y-4">
                   <section>
                     <h4 className="text-green-400 mb-2">Market Potential</h4>
